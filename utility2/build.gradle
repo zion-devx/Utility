@@ -1,0 +1,60 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 30
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0.1"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    android.libraryVariants.all {
+        variant ->
+            variant.outputs.all {
+                def aarName = "Utility2_V${defaultConfig.versionName}.aar"
+                outputFileName = aarName
+            }
+            if (variant.buildType.name == "release") {
+                variant.assemble.doLast {
+                    variant.outputs.all {
+                        output ->
+                            def outputPath = project.rootDir.absolutePath + "/utility2/aar"
+                            def outputDir = new File(outputPath)
+                            if (!outputDir.exists()) {
+                                outputDir.mkdirs()
+                            }
+                            copy {
+                                from output.outputFile
+                                into outputPath
+                            }
+                    }
+                }
+            }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'androidx.core:core:1.15.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.google.code.gson:gson:2.8.5'
+
+    // 这个库会报错 强制排除这个库
+    configurations.all {
+        exclude group: 'androidx.annotation', module: 'annotation-experimental'
+    }
+}

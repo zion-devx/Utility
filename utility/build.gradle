@@ -1,0 +1,77 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 29
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0.1"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    android.libraryVariants.all {
+        variant ->
+            variant.outputs.all {
+                def aarName = "Utility_V${defaultConfig.versionName}.aar"
+                outputFileName = aarName
+            }
+            if (variant.buildType.name == "release") {
+                variant.assemble.doLast {
+                    variant.outputs.all {
+                        output ->
+                            def outputPath = project.rootDir.absolutePath + "/utility/aar"
+                            def outputDir = new File(outputPath)
+                            if (!outputDir.exists()) {
+                                outputDir.mkdirs()
+                            }
+                            copy {
+                                from output.outputFile
+                                into outputPath
+                            }
+                    }
+                }
+            }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+
+    implementation 'com.google.code.gson:gson:2.8.5'
+
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:design:28.0.0'
+
+    implementation files('libs/aspose-cells-8.5.0.jar')
+
+    //轻量级Android AOP框架：https://github.com/eleme/lancet
+//    implementation 'me.ele:lancet-base:1.0.6'
+
+    api 'com.squareup.retrofit2:retrofit:2.3.0'
+    api 'com.squareup.okhttp3:logging-interceptor:3.4.1'
+    api 'com.squareup.retrofit2:converter-gson:2.3.0'
+    api 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    api 'com.squareup.retrofit2:converter-scalars:2.0.2'
+    api 'org.greenrobot:eventbus:3.0.0'
+
+    api "io.reactivex.rxjava2:rxjava:2.2.8"
+    api 'io.reactivex.rxjava2:rxandroid:2.1.1'
+
+    api 'com.tencent:mmkv-static:1.2.8'
+
+//    api project(path: ":protocol")
+}
